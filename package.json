@@ -2,10 +2,13 @@
   "name": "auth-server",
   "version": "1.0.0",
   "description": "JWT authentication server",
-  "main": "index.js",
+  "main": "./dist/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "tsc -p ."
+    "debug": "nodemon --watch ./dist --nolazy --inspect=0.0.0.0:9229 ./dist/server.js",
+    "docker-debug": "docker-compose up",
+    "build": "tsc -p ./src",
+    "watch": "tsc -w -p ./src",
+    "start": "node ./dist/server.js"
   },
   "author": "Tom Fenech",
   "license": "GPL-3.0",
@@ -16,6 +19,7 @@
     "@types/http-proxy-middleware": "^0.17.1",
     "@types/jsonwebtoken": "^7.2.3",
     "@types/mongoose": "^4.7.23",
+    "@types/node": "^8.0.41",
     "bcrypt": "^1.0.3",
     "body-parser": "^1.18.2",
     "express": "^4.16.2",
@@ -23,5 +27,8 @@
     "jsonwebtoken": "^8.1.0",
     "mongoose": "^4.12.2",
     "typescript": "^2.5.3"
+  },
+  "devDependencies": {
+    "nodemon": "^1.12.1"
   }
 }

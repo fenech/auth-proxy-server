@@ -4,11 +4,9 @@ import * as bcrypt from "bcrypt";
 import * as express from "express";
 import { UserModel } from "../models/userModel";
 
-const secret: string = require("./secret.json");
-
 const User = mongoose.model<UserModel>("User");
 
-export const logIn: express.RequestHandler = (req, res) => {
+export const logIn: { (secret: string): express.RequestHandler } = (secret) => (req, res) => {
     User.findOne({
         email: req.body.email
     }, (error, user) => {
@@ -21,10 +19,10 @@ export const logIn: express.RequestHandler = (req, res) => {
                 _id: user._id
             };
 
-            return res.json({ token: jwt.sign(payload, "vlU7AVKCoLYk8F2tigkK") });
+            res.json({ token: jwt.sign(payload, secret) });
+        } else {
+            res.status(401).json({ message: "Authentication failed" });
         }
-
-        res.status(401).json({ message: "Authentication failed" });
     });
 };
 

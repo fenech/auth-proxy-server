@@ -1,5 +1,7 @@
+.vscode
+
 dist
 node_modules
 
-secret.json
-proxyConfig.json
+config/secret.txt
+config/proxyConfig.json
