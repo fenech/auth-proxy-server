@@ -1,7 +1,6 @@
 import * as express from "express";
 import * as proxy from "http-proxy-middleware";
 import * as mongoose from "mongoose";
-import * as bcrypt from "bcrypt";
 import * as bodyParser from "body-parser";
 import * as jsonwebtoken from "jsonwebtoken";
 import { UserSchema } from "./api/models/userModel";
@@ -9,10 +8,11 @@ import { readFileSync } from "fs";
 import * as path from "path";
 
 const secret = readFileSync(path.join(__dirname, "..", "config", "secret.txt"), "utf8");
+
 mongoose.connect('mongodb://mongo/Users');
 mongoose.model("User", UserSchema);
 
-import { logIn, loginRequired } from "./api/controllers/userController";
+import { register, logIn, loginRequired } from "./api/controllers/userController";
 
 const app = express();
 
@@ -33,7 +33,7 @@ app.use(function (req: express.Request & { user: string }, res, next) {
         const [key, value] = (req.headers.authorization as string).split(" ");
 
         if (key === 'JWT') {
-            jsonwebtoken.verify(value, secret, function (err, decode: string) {
+            jsonwebtoken.verify(value, secret, (err, decode: string) => {
                 if (!err) {
                     req.user = decode;
                 }
@@ -44,6 +44,7 @@ app.use(function (req: express.Request & { user: string }, res, next) {
     next();
 });
 
+app.route("/auth/register").post(register);
 app.route("/auth/log_in").post(logIn(secret));
 app.route("/api").all(
     loginRequired,

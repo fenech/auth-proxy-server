@@ -1,13 +1,15 @@
 # auth-proxy-server
 Forward authenticated requests on to a remote API which uses HTTP Basic Auth.
 
-There are two endpoints:
+The server has the following endpoints:
 
-- **POST** `/auth/log_in` `{ email, password }`: returns `{ "token", "JWT token" }` for valid users
+- **POST** `/auth/register` `{ fullName, email, password }`: registers a new user.
+- **POST** `/auth/log_in` `{ email, password }`: returns `{ "token", "[JWT token]" }` for previously-registered `{ email, password }` combinations.
 - `/api/*` with `Authorization: JWT [JWT token]` header: passes requests onto remote API, adding the required Basic Auth credentials.
 
 ## Requirements
-- docker (+ docker compose, optionally)
+- docker
+- docker-compose (optional, but recommended)
 - mongo docker container: `docker pull mongo`
 
 ## Configuration
@@ -23,7 +25,7 @@ Two files must be added to the `config` directory:
 
 ### `secret.txt`
 ```
-your-secret-string
+The contents of this file will be used to sign the JSON Web Token used for authentication
 ```
 
 ## Running
@@ -79,3 +81,7 @@ The `tsc-watch` pre-launch task is defined in `.vscode/tasks.json`:
     ]
 }
 ```
+
+## Acknowledgements
+
+The server code is based on https://www.codementor.io/olatundegaruba/5-steps-to-authenticating-node-js-with-jwt-7ahb5dmyr

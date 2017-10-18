@@ -6,6 +6,19 @@ import { UserModel } from "../models/userModel";
 
 const User = mongoose.model<UserModel>("User");
 
+export const register: express.RequestHandler = (req, res) => {
+    const newUser = new User(req.body);
+    newUser.hash_password = bcrypt.hashSync(req.body.password, 10);
+    newUser.save((err, user) => {
+        if (err) {
+            res.status(400).json({ message: err });
+        } else {
+            user.hash_password = undefined;
+            res.json(user);
+        }
+    });
+};
+
 export const logIn: { (secret: string): express.RequestHandler } = (secret) => (req, res) => {
     User.findOne({
         email: req.body.email
