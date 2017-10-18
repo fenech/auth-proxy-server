@@ -2,11 +2,8 @@ version: "3.3"
 services:
   proxy:
     build: .
-    command: npm run debug
-    volumes:
-      - ./dist:/opt/app/dist
+    command: npm run start
     ports:
       - "3000:3000"
-      - "9229:9229"
   mongo:
     image: "mongo"

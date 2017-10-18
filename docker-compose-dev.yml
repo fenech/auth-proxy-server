@@ -1,0 +1,8 @@
+version: "3.3"
+services:
+  proxy:
+    command: npm run debug
+    volumes:
+      - ./dist:/opt/app/dist
+    ports:
+      - "9229:9229"

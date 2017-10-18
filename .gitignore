@@ -2,6 +2,3 @@
 
 dist
 node_modules
-
-config/secret.txt
-config/proxyConfig.json
