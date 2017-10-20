@@ -2,6 +2,7 @@ import * as express from "express";
 import * as proxy from "http-proxy-middleware";
 import * as mongoose from "mongoose";
 import * as bodyParser from "body-parser";
+import * as cookieParser from "cookie-parser";
 import * as jsonwebtoken from "jsonwebtoken";
 import { UserSchema } from "./api/models/userModel";
 import { readFileSync } from "fs";
@@ -16,8 +17,8 @@ import { register, logIn, loginRequired } from "./api/controllers/userController
 
 const app = express();
 
-app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+app.use(cookieParser());
 
 const proxyConfig = require("../config/proxyConfig.json");
 const config: proxy.Config = {
@@ -26,19 +27,33 @@ const config: proxy.Config = {
     pathRewrite: { "^/api": "" }
 };
 
-app.use(function (req: express.Request & { user: string }, res, next) {
-    req.user = undefined;
+interface Request extends express.Request {
+    user: string;
+    cookies: {
+        accessToken: string;
+    };
+}
 
-    if (req.headers && req.headers.authorization) {
+app.use((req: Request, res, next) => {
+    req.user = undefined;
+    let token: string;
+
+    if (req.cookies && req.cookies.accessToken) {
+        token = req.cookies.accessToken;
+    } else if (req.headers && req.headers.authorization) {
         const [key, value] = (req.headers.authorization as string).split(" ");
 
         if (key === 'JWT') {
-            jsonwebtoken.verify(value, secret, (err, decode: string) => {
-                if (!err) {
-                    req.user = decode;
-                }
-            });
+            token = value;
         }
+    }
+
+    if (token) {
+        jsonwebtoken.verify(token, secret, (err, decode: string) => {
+            if (!err) {
+                req.user = decode;
+            }
+        });
     }
 
     next();
@@ -46,7 +61,7 @@ app.use(function (req: express.Request & { user: string }, res, next) {
 
 app.route("/auth/register").post(register);
 app.route("/auth/log_in").post(logIn(secret));
-app.route("/api").all(
+app.use("/api",
     loginRequired,
     (req, res, next) => {
         req.headers.authorization = "";

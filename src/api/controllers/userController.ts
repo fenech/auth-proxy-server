@@ -32,7 +32,9 @@ export const logIn: { (secret: string): express.RequestHandler } = (secret) => (
                 _id: user._id
             };
 
-            res.json({ token: jwt.sign(payload, secret) });
+            const accessToken = jwt.sign(payload, secret);
+
+            res.cookie("accessToken", accessToken, { httpOnly: true }).send();
         } else {
             res.status(401).json({ message: "Authentication failed" });
         }
