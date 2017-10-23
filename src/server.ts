@@ -7,18 +7,16 @@ import * as jsonwebtoken from "jsonwebtoken";
 import { UserSchema } from "./api/models/userModel";
 import { readFileSync } from "fs";
 import * as path from "path";
+import { UserModel } from "./api/models/userModel";
+import { register, logIn } from "./api/controllers/userController";
 
 const secret = readFileSync(path.join(__dirname, "..", "config", "secret.txt"), "utf8");
 
 mongoose.connect('mongodb://mongo/Users');
 mongoose.model("User", UserSchema);
-
-import { register, logIn, loginRequired } from "./api/controllers/userController";
+const User = mongoose.model<UserModel>("User");
 
 const app = express();
-
-app.use(bodyParser.json());
-app.use(cookieParser());
 
 const proxyConfig = require("../config/proxyConfig.json");
 const config: proxy.Config = {
@@ -27,45 +25,34 @@ const config: proxy.Config = {
     pathRewrite: { "^/api": "" }
 };
 
-interface Request extends express.Request {
-    user: string;
-    cookies: {
-        accessToken: string;
-    };
-}
+app.use("/auth", bodyParser.json());
+app.route("/auth/register").post(register(User));
+app.route("/auth/log_in").post(logIn(User, secret));
 
-app.use((req: Request, res, next) => {
-    req.user = undefined;
-    let token: string;
-
-    if (req.cookies && req.cookies.accessToken) {
-        token = req.cookies.accessToken;
-    } else if (req.headers && req.headers.authorization) {
-        const [key, value] = (req.headers.authorization as string).split(" ");
-
-        if (key === 'JWT') {
-            token = value;
-        }
-    }
-
-    if (token) {
-        jsonwebtoken.verify(token, secret, (err, decode: string) => {
-            if (!err) {
-                req.user = decode;
-            }
-        });
-    }
-
-    next();
-});
-
-app.route("/auth/register").post(register);
-app.route("/auth/log_in").post(logIn(secret));
 app.use("/api",
-    loginRequired,
+    cookieParser(),
     (req, res, next) => {
-        req.headers.authorization = "";
-        next();
+        let token: string;
+
+        if (req.cookies && req.cookies.accessToken) {
+            token = req.cookies.accessToken;
+        } else if (req.headers && req.headers.authorization) {
+            const [key, value] = (req.headers.authorization as string).split(" ");
+
+            if (key === 'JWT') {
+                token = value;
+            }
+        }
+
+        if (token) {
+            jsonwebtoken.verify(token, secret, (err, decode: string) => {
+                if (!err) {
+                    next();
+                }
+            });
+        } else {
+            res.status(401).json({ message: "Unauthenticated user" });
+        }
     },
     proxy(config));
 
