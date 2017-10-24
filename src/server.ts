@@ -21,7 +21,6 @@ const app = express();
 const proxyConfig = require("../config/proxyConfig.json");
 const config: proxy.Config = {
     ...proxyConfig,
-    secure: false,
     pathRewrite: { "^/api": "" }
 };
 
