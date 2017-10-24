@@ -47,6 +47,7 @@ app.use("/api",
         if (token) {
             jsonwebtoken.verify(token, secret, (err, decode: string) => {
                 if (!err) {
+                    delete req.headers.authorization;
                     next();
                 }
             });
