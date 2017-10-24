@@ -32,7 +32,7 @@ export const logIn = (User: User, secret: string): express.RequestHandler => (re
                 _id: user._id
             };
 
-            const accessToken = jwt.sign(payload, secret);
+            const accessToken = jwt.sign(payload, secret, { expiresIn: "8h" });
 
             res.cookie("accessToken", accessToken, { httpOnly: true }).send();
         } else {
