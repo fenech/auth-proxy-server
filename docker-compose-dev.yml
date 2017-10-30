@@ -4,5 +4,7 @@ services:
     command: npm run debug
     volumes:
       - ./dist:/opt/app/dist
+      - ./config:/opt/app/config
     ports:
+      - "3000:3000"
       - "9229:9229"
