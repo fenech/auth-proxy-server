@@ -12,8 +12,9 @@ import { register, logIn } from "./api/controllers/userController";
 
 const secret = readFileSync(path.join(__dirname, "..", "config", "secret.txt"), "utf8");
 
-mongoose.connect('mongodb://mongo/Users');
+mongoose.connect("mongodb://mongo/Users", { useMongoClient: true });
 mongoose.model("User", UserSchema);
+
 const User = mongoose.model<UserModel>("User");
 
 const app = express();
