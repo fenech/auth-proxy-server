@@ -1,11 +1,13 @@
 version: "3.3"
 services:
   proxy:
+    image: bscaloja/aloja-proxy:1.0
     build: ${PROXY_CONTEXT:-.}
     command: npm run start
     volumes:
       - ./config:/opt/app/config
     depends_on:
       - mongo
+
   mongo:
-    image: "mongo"
+    image: mongo
