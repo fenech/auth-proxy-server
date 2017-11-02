@@ -3,6 +3,8 @@ services:
   proxy:
     build: ${PROXY_CONTEXT:-.}
     command: npm run start
+    volumes:
+      - ./config:/opt/app/config
     depends_on:
       - mongo
   mongo:
